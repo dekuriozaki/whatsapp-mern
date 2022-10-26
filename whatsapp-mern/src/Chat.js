@@ -5,12 +5,29 @@ import AttachFileIcon from '@mui/icons-material/AttachFile';
 import InsertEmoticonIcon from '@mui/icons-material/InsertEmoticon';
 import SendIcon from '@mui/icons-material/Send';
 import KeyboardVoiceIcon from '@mui/icons-material/KeyboardVoice';
+import axios from './axios';
 import './Chat.css'
-import React from 'react'
+import React, { useState } from 'react'
 import Chatreceived from './Chatreceived';
 import Chatsent from './Chatsent';
 
-function Chat() {
+function Chat({messages}) {
+  const [input,setInput] = useState("");
+
+  const sendMessage = async (e) => {
+    e.preventDefault();
+    await axios.post('/api/messages/new',
+      {
+        message:input,
+        name:"deku",
+        timestamp: "12:00pm",
+        received: false
+      }
+    )
+
+    setInput('');
+  };
+
   return (
     <div className='chat'>
       <div className='chat__header'>
@@ -29,8 +46,13 @@ function Chat() {
         </div>
       </div>
       <div className='chat__body'>
-        <Chatreceived/>
-        <Chatsent/>
+      {messages.map((message)=>{
+        if(message.received){
+          return <Chatreceived message={message} />
+        }else{
+          return <Chatsent message={message}/>
+        }
+      })}
       </div>
       <div className='chat__footer'>
         <InsertEmoticonIcon/>
@@ -38,11 +60,13 @@ function Chat() {
           <AttachFileIcon/> {/*  comes in chat footer */}
         </IconButton>
         <form>
-          <input placeholder='Type a message' type='text'/>
+          <input value={input} 
+          onChange = {e=>setInput(e.target.value)} 
+          placeholder='Type a message' type='text'/>
           <IconButton>
               <KeyboardVoiceIcon/>
           </IconButton>
-          <button type='submit'>
+          <button onClick= {sendMessage} type='submit'>
             <IconButton>
               <SendIcon/>
             </IconButton>
